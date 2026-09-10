@@ -1,1 +1,94 @@
-adkfdskjfhkjdsfkd
+#include "../src/vertex_coloring.h"
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+bool isSafe(
+    int u,
+    int c,
+    int v,
+    const vector<int>& row_pointer,
+    const vector<int>& colIndex,
+    const vector<int>& color)
+{
+    for (int j = row_pointer[u]; j < row_pointer[u + 1]; j++)
+    {
+        int neighbour = colIndex[j];
+
+        if (color[neighbour] == c)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool colorGraph(
+    int u,
+    int v,
+    int numColors,
+    const vector<int>& row_pointer,
+    const vector<int>& colIndex,
+    vector<int>& color)
+{
+    // All vertices are colored
+    if (u == v)
+    {
+        return true;
+    }
+
+    // Try every color
+    for (int c = 0; c < numColors; c++)
+    {
+        if (isSafe(u, c, v, row_pointer, colIndex, color))
+        {
+            color[u] = c;
+
+            if (colorGraph(
+                    u + 1,
+                    v,
+                    numColors,
+                    row_pointer,
+                    colIndex,
+                    color))
+            {
+                return true;
+            }
+
+            // Backtrack
+            color[u] = -1;
+        }
+    }
+
+    return false;
+}
+
+
+void vertexcoloring(
+    int v,
+    const vector<int>& row_pointer,
+    const vector<int>& colIndex,
+    vector<int>& color)
+{
+    color.assign(v, -1);
+
+    // Try 1 color, then 2, then 3, ...
+    for (int numColors = 1; numColors <= v; numColors++)
+    {
+        color.assign(v, -1);
+
+        if (colorGraph(
+                0,
+                v,
+                numColors,
+                row_pointer,
+                colIndex,
+                color))
+        {
+            cout << "Minimum colours = " << numColors << endl;
+            return;
+        }
+    }
+}
